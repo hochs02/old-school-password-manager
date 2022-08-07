@@ -78,6 +78,8 @@ void list(std::shared_ptr<std::string> login, int& number) {
 	std::string filepath = path_string + "/entries/" + *login + "_entries/";
 	auto dirIter = std::filesystem::directory_iterator(filepath);
 	int fileCount = 0;
+	std::string standin = *login;
+	int previous_number = 0;
 	
 	std::set<std::filesystem::path> sorted_by_name;
 
@@ -88,10 +90,44 @@ void list(std::shared_ptr<std::string> login, int& number) {
 			number = fileCount;
 			sorted_by_name.insert(entry.path());
 			
+			std::string filename_string = entry.path();
+			filename_string.erase (filename_string.begin(),filename_string.begin() + filepath.size());
+			std::string filename_original = filename_string;
+			filename_string.erase (filename_string.begin() + 1, filename_string.begin() + standin.size() + 14);
+			int number = std::stoi(filename_string);
+			
+			int difference = number - previous_number;
+			previous_number = number;
+			
+			if (difference > 1){
+				//decrement number by one;
+				//convert number to string;
+				//change filename with new string at start;
+				//std::cout << "Da stimmt was nicht" << '\n';
+				number = number - 1;
+				std::string correct_number_string = std::to_string(number);
+				std::string new_filename = correct_number_string + "_" + *login + ".txt";
+				//filename_string.replace(0, 1, correct_number_string);
+				filename_original.insert(0, "entries/");
+				new_filename.insert(0, "entries/");
+				rename(filename_original.c_str(), new_filename.c_str());
+				std::cout << new_filename << '\n';
+				
+				int result = rename(filename_original.c_str(), new_filename.c_str());
+				if ( result == 0 ) {
+				   std::cout << "Yes" << '\n';
+				} else {
+				   std::cout << "No" << '\n';
+				}
+				
+			}
+			else {
+				std::cout << "Alles in Ordnung" << '\n';
+			}
+			
 		}
 	}
 	int i = 0;
-	std::string standin = *login;
 	for (auto &filename : sorted_by_name){
 		std::string path_string = filename.c_str();
 		path_string.erase (path_string.begin(),path_string.begin() + filepath.size());	
